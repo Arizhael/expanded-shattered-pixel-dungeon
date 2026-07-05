@@ -77,6 +77,13 @@ public class MobSpawner extends Actor {
 				return new ArrayList<>(Arrays.asList(
 						Rat.class, Rat.class, Rat.class,
 						Snake.class));
+
+			/* TEST Íncubo
+			case 1:
+			default:
+				return new ArrayList<>(Arrays.asList(
+						Incubus.class));*/
+
 			case 2:
 				//2x rat, 1x snake, 2x gnoll
 				return new ArrayList<>(Arrays.asList(Rat.class, Rat.class,
@@ -272,5 +279,8 @@ public class MobSpawner extends Actor {
 		RARE_ALTS.put(Elemental.class,      Elemental.ChaosElemental.class);
 
 		RARE_ALTS.put(Scorpio.class,        Acidic.class);
+
+		// NUEVO ENEMIGO RARO "Íncubo"
+		RARE_ALTS.put(Succubus.class, Incubus.class);
 	}
 }
