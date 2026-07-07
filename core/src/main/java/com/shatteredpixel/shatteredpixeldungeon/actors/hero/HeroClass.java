@@ -81,6 +81,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingSt
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.utils.DeviceCompat;
+//Test Íncubo - import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
+//Test Íncubo - import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfPrismaticLight;
 
 public enum HeroClass {
 
@@ -141,6 +143,18 @@ public enum HeroClass {
 				initCleric( hero );
 				break;
 		}
+		/* TEST ÍNCUBO
+		PotionOfMindVision mindVision = new PotionOfMindVision();
+		mindVision.identify().collect();
+
+		WandOfPrismaticLight prismaticLight = new WandOfPrismaticLight();
+		prismaticLight.identify().collect();
+
+		TalismanOfForesight foresightTalisman = new TalismanOfForesight();
+		foresightTalisman.identify().collect();
+
+		Dungeon.quickslot.setSlot(2, mindVision);
+		Dungeon.quickslot.setSlot(3, prismaticLight);*/
 
 		if (SPDSettings.quickslotWaterskin()) {
 			for (int s = 0; s < QuickSlot.SIZE; s++) {

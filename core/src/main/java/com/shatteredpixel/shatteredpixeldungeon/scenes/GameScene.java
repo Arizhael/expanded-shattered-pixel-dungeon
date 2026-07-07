@@ -38,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Incubus;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DemonSpawner;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Ghoul;
@@ -1726,7 +1727,19 @@ public class GameScene extends PixelScene {
 	public static void examineObject(Object o){
 		if (o == Dungeon.hero){
 			GameScene.show( new WndHero() );
+
 		} else if ( o instanceof Mob && ((Mob) o).isActive() ){
+
+			if (o instanceof Incubus && ((Incubus) o).isIncubusInvisible()) {
+				GameScene.show(new WndMessage(Messages.get(Incubus.class, "watching")));
+				return;
+			}
+
+			GameScene.show(new WndInfoMob((Mob) o));
+			if (o instanceof Snake && !Document.ADVENTURERS_GUIDE.isPageRead(Document.GUIDE_SURPRISE_ATKS)){
+				GameScene.flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_SURPRISE_ATKS);
+			}
+
 			GameScene.show(new WndInfoMob((Mob) o));
 			if (o instanceof Snake && !Document.ADVENTURERS_GUIDE.isPageRead(Document.GUIDE_SURPRISE_ATKS)){
 				GameScene.flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_SURPRISE_ATKS);

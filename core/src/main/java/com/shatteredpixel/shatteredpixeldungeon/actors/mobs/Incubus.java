@@ -17,6 +17,7 @@ public class Incubus extends Mob {
     private boolean incubusInvisible = false;
     private boolean surpriseAttacking = false;
 
+
     private int turnsOutOfHeroFOV = 0;
     private int lastHeroPos = -1;
 
@@ -45,7 +46,7 @@ public class Incubus extends Mob {
 
     @Override
     public int damageRoll() {
-        return Random.NormalIntRange(25,30);
+        return Random.NormalIntRange(25, 30);
     }
 
     @Override
@@ -200,6 +201,23 @@ public class Incubus extends Mob {
         turnsOutOfHeroFOV = bundle.getInt(TURNS_OUT_OF_HERO_FOV);
         lastHeroPos = bundle.getInt(LAST_HERO_POS);
         updateIncubusSpriteState();
+    }
+
+    public boolean isIncubusInvisible() {
+        return incubusInvisible;
+    }
+
+    public void revealBySearch() {
+        if (incubusInvisible) {
+            surpriseAttacking = false;
+            setIncubusInvisible(false);
+
+            if (Dungeon.hero != null) {
+                startFleeingFrom(Dungeon.hero);
+            } else {
+                state = FLEEING;
+            }
+        }
     }
 
     private void startFleeingFrom(Char enemy) {

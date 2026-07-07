@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Incubus;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
@@ -188,9 +189,13 @@ public class TalismanOfForesight extends Artifact {
 					}
 
 					Char ch = Actor.findChar(cell);
-					if (ch != null
-							&& (ch.alignment != Char.Alignment.NEUTRAL || ch instanceof Mimic)
-							&& ch.alignment != curUser.alignment){
+
+					if (ch instanceof Incubus && ((Incubus) ch).isIncubusInvisible() && ch.alignment != curUser.alignment) {
+						((Incubus) ch).revealBySearch();
+						noticed = true;
+					}
+
+					if (ch != null && (ch.alignment != Char.Alignment.NEUTRAL || ch instanceof Mimic || ch instanceof Incubus) && ch.alignment != curUser.alignment){
 						Buff.append(curUser, CharAwareness.class, 5 + 2*level()).charID = ch.id();
 
 						artifactProc(ch, visiblyUpgraded(), (int)(3 + dist*1.08f));
@@ -300,6 +305,35 @@ public class TalismanOfForesight extends Artifact {
 			return true;
 		}
 
+		private boolean incubusNearby() {
+
+			int distance = 3;
+
+			int cx = target.pos % Dungeon.level.width();
+			int cy = target.pos / Dungeon.level.width();
+
+			int ax = Math.max(0, cx - distance);
+			int bx = Math.min(Dungeon.level.width() - 1, cx + distance);
+			int ay = Math.max(0, cy - distance);
+			int by = Math.min(Dungeon.level.height() - 1, cy + distance);
+
+			for (int y = ay; y <= by; y++) {
+				for (int x = ax, p = ax + y * Dungeon.level.width(); x <= bx; x++, p++) {
+
+					Char ch = Actor.findChar(p);
+
+					if (Dungeon.level.heroFOV[p]
+							&& ch instanceof Incubus
+							&& ((Incubus) ch).isIncubusInvisible()
+							&& ch.alignment != target.alignment) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
 		public void checkAwareness(){
 			boolean smthFound = false;
 
@@ -334,6 +368,15 @@ public class TalismanOfForesight extends Artifact {
 							smthFound = true;
 						}
 					}
+
+					Char ch = Actor.findChar(p);
+					if (Dungeon.level.heroFOV[p]
+							&& ch instanceof Incubus
+							&& ((Incubus) ch).isIncubusInvisible()
+							&& ch.alignment != target.alignment) {
+						smthFound = true;
+					}
+
 				}
 			}
 
@@ -341,7 +384,7 @@ public class TalismanOfForesight extends Artifact {
 					&& !cursed
 					&& target.buff(MagicImmune.class) == null){
 				if (!warn){
-					GLog.w( Messages.get(this, "uneasy") );
+					GLog.w(incubusNearby() ? Messages.get(Incubus.class, "watching") : Messages.get(this, "uneasy"));
 					if (target instanceof Hero){
 						((Hero)target).interrupt();
 					}

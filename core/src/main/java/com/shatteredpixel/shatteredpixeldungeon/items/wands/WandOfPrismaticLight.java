@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Incubus;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -115,8 +116,17 @@ public class WandOfPrismaticLight extends DamageWand {
 			for (int n : PathFinder.NEIGHBOURS9){
 				int cell = c+n;
 
-				if (Dungeon.level.discoverable[cell])
-					Dungeon.level.mapped[cell] = true;
+				if (!Dungeon.level.insideMap(cell)){
+					continue;
+				}
+
+				if (Dungeon.level.discoverable[cell]) Dungeon.level.mapped[cell] = true;
+
+				Char target = Actor.findChar(cell);
+				if (target instanceof Incubus && ((Incubus) target).isIncubusInvisible()) {
+					((Incubus) target).revealBySearch();
+					noticed = true;
+				}
 
 				int terr = Dungeon.level.map[cell];
 				if ((Terrain.flags[terr] & Terrain.SECRET) != 0) {

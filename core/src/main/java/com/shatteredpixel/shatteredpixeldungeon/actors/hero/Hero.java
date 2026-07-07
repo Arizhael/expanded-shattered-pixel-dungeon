@@ -76,6 +76,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HallowedGroun
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Smite;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Incubus;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
@@ -2553,6 +2554,12 @@ public class Hero extends Char {
 
 					if (foresight){
 						Dungeon.level.mapped[curr] = true;
+					}
+
+					Char ch = Actor.findChar(curr);
+					if (ch instanceof Incubus && ((Incubus) ch).isIncubusInvisible()) {
+						((Incubus) ch).revealBySearch();
+						smthFound = true;
 					}
 					
 					if (Dungeon.level.secret[curr]){
