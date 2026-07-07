@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Incubus;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 
 public class TargetHealthIndicator extends HealthBar {
@@ -39,9 +40,15 @@ public class TargetHealthIndicator extends HealthBar {
 	@Override
 	public void update() {
 		super.update();
-		
+
 		if (target != null && target.isAlive() && target.isActive()
 				&& target.sprite != null && target.sprite.visible) {
+
+            if (target instanceof Incubus && ((Incubus)target).isIncubusInvisible()){
+                visible = false;
+                return;
+            }
+
 			CharSprite sprite = target.sprite;
 			width = sprite.width();
 			x = sprite.x;

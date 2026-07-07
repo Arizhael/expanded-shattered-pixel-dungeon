@@ -10,6 +10,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.IncubusSprite;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
 
 public class Incubus extends Mob {
@@ -40,6 +41,9 @@ public class Incubus extends Mob {
 
         properties.add(Property.DEMONIC);
 
+        //Incubuses are neutral when invisible
+        alignment = Alignment.NEUTRAL;
+
         HUNTING = new IncubusHunting();
         FLEEING = new IncubusFleeing();
     }
@@ -65,7 +69,7 @@ public class Incubus extends Mob {
 
     @Override
     public float speed() {
-        return super.speed() * (incubusInvisible ? 2f : 1f);
+        return super.speed() * (incubusInvisible ? 1f : 2f);
     }
 
     @Override
@@ -89,6 +93,29 @@ public class Incubus extends Mob {
 
         return actedImmediately;
     }
+
+    @Override
+    public boolean interact(Char c) {
+        if (alignment != Alignment.NEUTRAL || c != Dungeon.hero){
+            return super.interact(c);
+        }
+
+        // Para evitar usar this en el Callback
+        Incubus thisIncubus = this;
+
+        Dungeon.hero.sprite.attack(thisIncubus.pos, new Callback() {
+            @Override
+            public void call() {
+                Dungeon.hero.busy();
+                Dungeon.hero.attack(thisIncubus);
+                Dungeon.hero.spendAndNext(Dungeon.hero.attackDelay());
+                setIncubusInvisible(false);
+                startFleeingFrom(Dungeon.hero);
+            }
+        });
+        return true;
+        }
+
 
     @Override
     public void onAttackComplete() {
@@ -239,6 +266,11 @@ public class Incubus extends Mob {
     }
 
     private void setIncubusInvisible(boolean invisible) {
+        if (invisible){
+            alignment = Alignment.NEUTRAL;
+        }else{
+            alignment = Alignment.ENEMY;
+        }
         incubusInvisible = invisible;
         updateIncubusSpriteState();
     }
