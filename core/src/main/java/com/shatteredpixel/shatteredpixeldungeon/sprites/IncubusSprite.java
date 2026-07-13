@@ -1,17 +1,30 @@
 package com.shatteredpixel.shatteredpixeldungeon.sprites;
 
-public class IncubusSprite extends SuccubusSprite {
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.watabou.noosa.TextureFilm;
 
-    private static final int INCUBUS_TINT = 0xFF5555;
+public class IncubusSprite extends MobSprite {
 
     public IncubusSprite() {
         super();
-        hardlight(INCUBUS_TINT);
+
+        texture(Assets.Sprites.INCUBUS);
+
+        TextureFilm frames = new TextureFilm(texture, 12, 15);
+
+        idle = new Animation(8, true);
+        idle.frames(frames, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 1);
+
+        run = new Animation(15, true);
+        run.frames(frames, 3, 4, 5, 6, 7, 8);
+
+        attack = new Animation(12, false);
+        attack.frames(frames, 9, 10, 11);
+
+        die = new Animation(10, false);
+        die.frames(frames, 12);
+
+        play(idle);
     }
 
-    @Override
-    public void resetColor() {
-        super.resetColor();
-        hardlight(INCUBUS_TINT);
-    }
 }

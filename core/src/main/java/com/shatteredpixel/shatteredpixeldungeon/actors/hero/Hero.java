@@ -2557,7 +2557,9 @@ public class Hero extends Char {
 					}
 
 					Char ch = Actor.findChar(curr);
-					if (ch instanceof Incubus && ((Incubus) ch).isIncubusInvisible()) {
+					if ((intentional || foresight)
+							&& ch instanceof Incubus
+							&& ((Incubus) ch).isIncubusInvisible()) {
 						((Incubus) ch).revealBySearch();
 						smthFound = true;
 					}

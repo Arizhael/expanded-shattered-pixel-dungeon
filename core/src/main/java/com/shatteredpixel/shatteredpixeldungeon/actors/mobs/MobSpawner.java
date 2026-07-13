@@ -78,7 +78,7 @@ public class MobSpawner extends Actor {
 						Rat.class, Rat.class, Rat.class,
 						Snake.class));
 
-			/* TEST Íncubo
+			/*TEST Íncubo
 			case 1:
 			default:
 				return new ArrayList<>(Arrays.asList(

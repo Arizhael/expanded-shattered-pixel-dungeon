@@ -17,6 +17,7 @@ public class Incubus extends Mob {
 
     private boolean incubusInvisible = false;
     private boolean surpriseAttacking = false;
+    private boolean cornered = false;
 
 
     private int turnsOutOfHeroFOV = 0;
@@ -25,6 +26,7 @@ public class Incubus extends Mob {
     private static final String INCUBUS_INVISIBLE = "incubus_invisible";
     private static final String TURNS_OUT_OF_HERO_FOV = "turns_out_of_hero_fov";
     private static final String LAST_HERO_POS = "last_hero_pos";
+    private static final String CORNERED = "cornered";
 
     {
         spriteClass = IncubusSprite.class;
@@ -41,7 +43,7 @@ public class Incubus extends Mob {
 
         properties.add(Property.DEMONIC);
 
-        //Incubuses are neutral when invisible
+        //Incubi are neutral when invisible
         alignment = Alignment.NEUTRAL;
 
         HUNTING = new IncubusHunting();
@@ -150,12 +152,32 @@ public class Incubus extends Mob {
 
         surpriseAttacking = false;
 
-        if (Dungeon.hero != null && fieldOfView != null && fieldOfView[Dungeon.hero.pos]) {
+        /* Si el íncubo recibe daño, siempre debe revelarse y reaccionar,
+         esto evita que al despertarlo con armas arrojadizas quede en:
+         WANDERING + invisible + neutral, ignorando al héroe.*/
+        if (Dungeon.hero != null && Dungeon.hero.isAlive()) {
             startFleeingFrom(Dungeon.hero);
-        } else if (state != FLEEING) {
-            state = WANDERING;
-            setIncubusInvisible(true);
+        } else {
+            setIncubusInvisible(false);
+            state = FLEEING;
         }
+    }
+
+    @Override
+    protected Char chooseEnemy() {
+
+        /* Aunque el íncubo sea NEUTRAL mientras está invisible,
+         su IA interna debe seguir recordando al héroe como presa,
+         sin esto, Mob.chooseEnemy() puede devolver null
+         porque los neutrales no eligen enemigos normalmente. */
+        if (incubusInvisible
+                && state != SLEEPING
+                && Dungeon.hero != null
+                && Dungeon.hero.isAlive()) {
+            return Dungeon.hero;
+        }
+
+        return super.chooseEnemy();
     }
 
     @Override
@@ -177,6 +199,7 @@ public class Incubus extends Mob {
 
         if (incubusInvisible) {
             alerted = false;
+            hideIncubusIndicators();
         }
 
         boolean result = super.act();
@@ -189,6 +212,7 @@ public class Incubus extends Mob {
 
         if (incubusInvisible) {
             alerted = false;
+            hideIncubusIndicators();
         }
 
         return result;
@@ -219,6 +243,7 @@ public class Incubus extends Mob {
         bundle.put(INCUBUS_INVISIBLE, incubusInvisible);
         bundle.put(TURNS_OUT_OF_HERO_FOV, turnsOutOfHeroFOV);
         bundle.put(LAST_HERO_POS, lastHeroPos);
+        bundle.put(CORNERED, cornered);
     }
 
     @Override
@@ -227,6 +252,7 @@ public class Incubus extends Mob {
         incubusInvisible = bundle.getBoolean(INCUBUS_INVISIBLE);
         turnsOutOfHeroFOV = bundle.getInt(TURNS_OUT_OF_HERO_FOV);
         lastHeroPos = bundle.getInt(LAST_HERO_POS);
+        cornered = bundle.getBoolean(CORNERED);
         updateIncubusSpriteState();
     }
 
@@ -247,8 +273,17 @@ public class Incubus extends Mob {
         }
     }
 
+    private void hideIncubusIndicators() {
+        if (sprite != null) {
+            sprite.hideAlert();
+            sprite.hideLost();
+            sprite.hideInvestigate();
+        }
+    }
+
     private void startFleeingFrom(Char enemy) {
 
+        cornered = false;
         setIncubusInvisible(false);
         turnsOutOfHeroFOV = 0;
 
@@ -268,6 +303,7 @@ public class Incubus extends Mob {
     private void setIncubusInvisible(boolean invisible) {
         if (invisible){
             alignment = Alignment.NEUTRAL;
+            cornered = false;
         }else{
             alignment = Alignment.ENEMY;
         }
@@ -294,7 +330,7 @@ public class Incubus extends Mob {
 
             /* Si el íncubo está visible y detecta al héroe,
              no debe atacar, debe intentar escapar primero.*/
-            if (!incubusInvisible && enemyInFOV && enemy != null) {
+            if (!incubusInvisible && !cornered && enemyInFOV && enemy != null) {
                 startFleeingFrom(enemy);
                 return FLEEING.act(enemyInFOV, justAlerted);
             }
@@ -349,7 +385,17 @@ public class Incubus extends Mob {
         @Override
         protected void nowhereToRun() {
             setIncubusInvisible(false);
+
+            /* Si está huyendo, ve al héroe y no tiene a dónde correr,
+             se comporta como el ladrón: muestra el estado de estar acorralado
+             y cambia a HUNTING para atacar.*/
+            cornered = enemySeen && enemy != null;
+
             super.nowhereToRun();
+
+            if (state != HUNTING) {
+                cornered = false;
+            }
         }
     }
 }
